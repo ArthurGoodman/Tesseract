@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Linq;
@@ -39,68 +40,28 @@ namespace Tesseract {
         }
 
         private void CreateTesseract() {
-            vertices = new Vector4[16];
+            List<Vector4> verticesList = new List<Vector4>();
+            List<Edge> edgesList = new List<Edge>();
 
-            vertices[0] = new Vector4(new double[4] { -1, -1, -1, -1 });
-            vertices[1] = new Vector4(new double[4] { 1, -1, -1, -1 });
-            vertices[2] = new Vector4(new double[4] { -1, 1, -1, -1 });
-            vertices[3] = new Vector4(new double[4] { 1, 1, -1, -1 });
+            verticesList.Add(new Vector4(new double[] { -1, -1, -1, -1 }));
 
-            vertices[4] = new Vector4(new double[4] { -1, -1, 1, -1 });
-            vertices[5] = new Vector4(new double[4] { 1, -1, 1, -1 });
-            vertices[6] = new Vector4(new double[4] { -1, 1, 1, -1 });
-            vertices[7] = new Vector4(new double[4] { 1, 1, 1, -1 });
+            for (int dim = 0; dim < 4; dim++) {
+                int count = (int)Math.Pow(2, dim);
 
-            vertices[8] = new Vector4(new double[4] { -1, -1, -1, 1 });
-            vertices[9] = new Vector4(new double[4] { 1, -1, -1, 1 });
-            vertices[10] = new Vector4(new double[4] { -1, 1, -1, 1 });
-            vertices[11] = new Vector4(new double[4] { 1, 1, -1, 1 });
+                for (int i = 0; i < count; i++) {
+                    verticesList.Add(new Vector4(verticesList[i].Data));
+                    verticesList.Last()[dim] = 1;
+                }
 
-            vertices[12] = new Vector4(new double[4] { -1, -1, 1, 1 });
-            vertices[13] = new Vector4(new double[4] { 1, -1, 1, 1 });
-            vertices[14] = new Vector4(new double[4] { -1, 1, 1, 1 });
-            vertices[15] = new Vector4(new double[4] { 1, 1, 1, 1 });
+                for (int i = 0; i < dim * count / 2; i++)
+                    edgesList.Add(new Edge(edgesList[i].A + count, edgesList[i].B + count));
 
-            edges = new Edge[32];
+                for (int i = 0; i < count; i++)
+                    edgesList.Add(new Edge(i, i + count));
+            }
 
-            edges[0] = new Edge(vertices[0], vertices[1]);
-            edges[1] = new Edge(vertices[1], vertices[3]);
-            edges[2] = new Edge(vertices[3], vertices[2]);
-            edges[3] = new Edge(vertices[2], vertices[0]);
-
-            edges[4] = new Edge(vertices[4], vertices[5]);
-            edges[5] = new Edge(vertices[5], vertices[7]);
-            edges[6] = new Edge(vertices[7], vertices[6]);
-            edges[7] = new Edge(vertices[6], vertices[4]);
-
-            edges[8] = new Edge(vertices[8], vertices[9]);
-            edges[9] = new Edge(vertices[9], vertices[11]);
-            edges[10] = new Edge(vertices[11], vertices[10]);
-            edges[11] = new Edge(vertices[10], vertices[8]);
-
-            edges[12] = new Edge(vertices[12], vertices[13]);
-            edges[13] = new Edge(vertices[13], vertices[15]);
-            edges[14] = new Edge(vertices[15], vertices[14]);
-            edges[15] = new Edge(vertices[14], vertices[12]);
-
-            edges[16] = new Edge(vertices[0], vertices[4]);
-            edges[17] = new Edge(vertices[1], vertices[5]);
-            edges[18] = new Edge(vertices[2], vertices[6]);
-            edges[19] = new Edge(vertices[3], vertices[7]);
-
-            edges[20] = new Edge(vertices[8], vertices[12]);
-            edges[21] = new Edge(vertices[9], vertices[13]);
-            edges[22] = new Edge(vertices[10], vertices[14]);
-            edges[23] = new Edge(vertices[11], vertices[15]);
-
-            edges[24] = new Edge(vertices[0], vertices[8]);
-            edges[25] = new Edge(vertices[1], vertices[9]);
-            edges[26] = new Edge(vertices[2], vertices[10]);
-            edges[27] = new Edge(vertices[3], vertices[11]);
-            edges[28] = new Edge(vertices[4], vertices[12]);
-            edges[29] = new Edge(vertices[5], vertices[13]);
-            edges[30] = new Edge(vertices[6], vertices[14]);
-            edges[31] = new Edge(vertices[7], vertices[15]);
+            vertices = verticesList.ToArray();
+            edges = edgesList.ToArray();
         }
 
         private void CreatePerspective() {
@@ -151,8 +112,8 @@ namespace Tesseract {
             Vector4 offset = new Vector4(new double[] { 0, 0, 7, 0 });
 
             foreach (Edge edge in edges) {
-                Vector4 a = new Vector4(edge.A.Data);
-                Vector4 b = new Vector4(edge.B.Data);
+                Vector4 a = new Vector4(vertices[edge.A].Data);
+                Vector4 b = new Vector4(vertices[edge.B].Data);
 
                 a += offset;
                 b += offset;
@@ -307,8 +268,6 @@ namespace Tesseract {
                 xMatrix2.Map(v);
                 yMatrix2.Map(v);
             }
-
-            vertices = vertices.OrderByDescending(v => v[2]).ToArray();
         }
     }
 }
