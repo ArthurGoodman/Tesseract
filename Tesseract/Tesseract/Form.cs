@@ -194,11 +194,15 @@ namespace Tesseract {
                 offsetY += (e.Location.Y - lastPos.Y) / scaleFactor;
             } else if (e.Button == MouseButtons.Right) {
                 if (ModifierKeys == Keys.Control) {
+                    alphaX1 = 0;
+                    alphaX1 = 0;
                     alphaX2 = (e.Location.X - lastPos.X) / scaleFactor / 4;
                     alphaY2 = (e.Location.Y - lastPos.Y) / scaleFactor / 4;
                 } else {
                     alphaX1 = (e.Location.X - lastPos.X) / scaleFactor / 4;
                     alphaY1 = (e.Location.Y - lastPos.Y) / scaleFactor / 4;
+                    alphaX2 = 0;
+                    alphaY2 = 0;
                 }
 
                 Rotate();
